@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request
 import json
+import os
 
 app = FastAPI()
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
+SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 
 @app.get("/")
