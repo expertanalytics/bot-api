@@ -30,7 +30,7 @@ async def events(request: Request):
 
 
 @app.post("/api/v1.0/schedule")
-async def events(request: Request):
+async def schedule(request: Request):
     req = await request.json()
     print(json.dumps(req, sort_keys=True, indent=4))
 
