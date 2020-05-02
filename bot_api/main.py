@@ -4,7 +4,9 @@ import datetime
 from datetime import date
 
 import requests
-from fastapi import FastAPI, Request, Form, Depends, HTTPException
+from fastapi import (FastAPI, Request, Form, Depends, HTTPException) 
+from fastapi.responses import JSONResponse
+        
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -56,6 +58,10 @@ async def schedule(*, channel_id: str = Form(...)):
 def read_event(db: Session = Depends(get_db)):
     db_event = crud.get_closest_event(db, when=date.today())
     if db_event is None or not db_event.who:
-        return "No upcoming events."
+        return JSONResponse({
+            "text": "No upcoming events.",
+            "response_type": "ephemeral"})
 
     return db_event
+
+
