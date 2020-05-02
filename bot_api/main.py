@@ -10,7 +10,18 @@ from sqlalchemy.orm import Session
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 
+
+models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
+
+# Dependency
+def get_db():
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
