@@ -21,3 +21,9 @@ def get_closest_event(db: Session, when: str):
     return db.query(models.Event).filter(
             models.Event.when >= when).order_by(
                     models.Event.when).limit(1).first()
+
+
+def get_upcoming_events(db: Session, when: str):
+    return db.query(models.Event).filter(
+            models.Event.when >= when).order_by(
+                    models.Event.when).all()
