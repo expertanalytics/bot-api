@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 app = FastAPI()
 
@@ -8,5 +8,6 @@ async def root():
     return {"Hello": "world"}
 
 @app.get("/events")
-async def events():
+async def events(request: Request):
+    print(request)
     return 
