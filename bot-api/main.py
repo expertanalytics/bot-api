@@ -7,7 +7,7 @@ app = FastAPI()
 async def root():
     return {"Hello": "world"}
 
-@app.get("/events")
+@app.post("/events")
 async def events(request: Request):
     print(request)
     return 
