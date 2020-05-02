@@ -59,7 +59,7 @@ def read_event(db: Session = Depends(get_db)):
     db_event = crud.get_closest_event(db, when=date.today())
 @app.post("/api/v1.0/next")
 async def read_event(db: Session = Depends(get_db)):
-    db_event = crud.get_closest_event(db, when=when)
+    db_event = crud.get_closest_event(db, when=date.today())
     if db_event is None or not db_event.who:
         return JSONResponse({
             "text": "No upcoming events.",
