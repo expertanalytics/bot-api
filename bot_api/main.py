@@ -57,11 +57,23 @@ async def schedule(*, channel_id: str = Form(...)):
 @app.post("/api/v1.0/next", response_model=schemas.Event)
 def read_event(db: Session = Depends(get_db)):
     db_event = crud.get_closest_event(db, when=date.today())
+@app.post("/api/v1.0/next")
+async def read_event(db: Session = Depends(get_db)):
+    db_event = crud.get_closest_event(db, when=when)
     if db_event is None or not db_event.who:
         return JSONResponse({
             "text": "No upcoming events.",
             "response_type": "ephemeral"})
 
-    return db_event
+    return models.get_formatted_event(db_event)
 
 
+@app.post("/api/v1.0/upcoming")
+async def read_events(db: Session = Depends(get_db)):
+    db_events = crud.get_upcoming_events(db, when=date.today())
+    if db_events is None:
+        return JSONResponse({
+            "text": "No upcoming events.",
+            "response_type": "ephemeral"})
+
+    return "\n".join([models.get_formatted_event(event) for event in db_events])
