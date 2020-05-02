@@ -65,7 +65,10 @@ async def read_event(db: Session = Depends(get_db)):
             "text": "No upcoming events.",
             "response_type": "ephemeral"})
 
-    return models.get_formatted_event(db_event)
+    response = models.get_formatted_event(db_event)
+    return JSONResponse({
+        "text": "response",
+        "response_type": "in_channel"})
 
 
 @app.post("/api/v1.0/upcoming")
@@ -76,4 +79,8 @@ async def read_events(db: Session = Depends(get_db)):
             "text": "No upcoming events.",
             "response_type": "ephemeral"})
 
-    return "\n".join([models.get_formatted_event(event) for event in db_events])
+    response = "\n".join(
+            [models.get_formatted_event(event) for event in db_events])
+    return JSONResponse({
+        "text": "response",
+        "response_type": "in_channel"})
