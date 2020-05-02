@@ -52,3 +52,10 @@ async def schedule(*, channel_id: str = Form(...)):
             }
    
     return response
+@app.post("/api/v1.0/next", response_model=schemas.Event)
+def read_event(db: Session = Depends(get_db)):
+    db_event = crud.get_closest_event(db, when=date.today())
+    if db_event is None or not db_event.who:
+        raise HTTPException(status_code=404, detail="No upcoming events.")
+
+    return db_event
