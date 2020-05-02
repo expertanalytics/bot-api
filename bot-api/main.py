@@ -12,4 +12,4 @@ async def events(request: Request):
     req = await request.json()
     print(req)
 
-    return {"challenge": req["token"]}
+    return await {"challenge": req["token"]}
