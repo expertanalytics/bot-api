@@ -67,7 +67,7 @@ async def read_event(db: Session = Depends(get_db)):
 
     response = models.get_formatted_event(db_event)
     return JSONResponse({
-        "text": "response",
+        "text": response,
         "response_type": "in_channel"})
 
 
@@ -82,5 +82,5 @@ async def read_events(db: Session = Depends(get_db)):
     response = "\n".join(
             [models.get_formatted_event(event) for event in db_events])
     return JSONResponse({
-        "text": "response",
+        "text": response,
         "response_type": "in_channel"})
