@@ -11,5 +11,5 @@ async def root():
 async def events(request: Request):
     req = await request.json()
     print(req)
-
-    return {"challenge": req["challenge"]}
+    if "challenge" in req:
+        return {"challenge": req["challenge"]}
