@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 import json
 import os
 import requests
@@ -30,9 +30,9 @@ async def events(request: Request):
 
 
 @app.post("/api/v1.0/schedule")
-async def schedule(request: Request):
-    req = await request.json()
-    print(json.dumps(req, sort_keys=True, indent=4))
+async def schedule(channel_id: str = Form(...)):
+    print(channel_id)
+    # print(json.dumps(req, sort_keys=True, indent=4))
 
     response = {
             "token": SLACK_BOT_TOKEN,
