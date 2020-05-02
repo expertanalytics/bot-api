@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 import json
 import os
+import requests
 
 app = FastAPI()
 
@@ -24,6 +25,5 @@ async def events(request: Request):
             "channel": req["event"]["channel"],
             "text": "hello world"
             }
-
-    print(response)
-    return response
+    
+    requests.post(POST_MESSAGE_URL, data=response)
