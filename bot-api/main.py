@@ -9,7 +9,7 @@ async def root():
 
 @app.post("/events")
 async def events(request: Request):
-    req = request.json()
+    req = await request.body()
     print(req)
 
-    return {"challenge": req.token}
+    return {"challenge": req["token"]}
