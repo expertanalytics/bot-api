@@ -54,9 +54,9 @@ async def schedule(*, channel_id: str = Form(...)):
             }
    
     return response
-@app.post("/api/v1.0/next", response_model=schemas.Event)
-def read_event(db: Session = Depends(get_db)):
-    db_event = crud.get_closest_event(db, when=date.today())
+
+
+
 @app.post("/api/v1.0/next")
 async def read_event(db: Session = Depends(get_db)):
     db_event = crud.get_closest_event(db, when=date.today())
