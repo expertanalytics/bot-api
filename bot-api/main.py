@@ -9,10 +9,6 @@ POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 
-@app.get("/")
-async def root():
-    return {"Hello": "world"}
-
 @app.post("/api/v1.0/events")
 async def events(request: Request):
     req = await request.json()
@@ -30,14 +26,11 @@ async def events(request: Request):
 
 
 @app.post("/api/v1.0/schedule")
-async def schedule(channel_id: str = Form(...)):
-    print(channel_id)
-    # print(json.dumps(req, sort_keys=True, indent=4))
+async def schedule(*, channel_id: str = Form(...)):
 
     response = {
-            "token": SLACK_BOT_TOKEN,
-            "channel": req["event"]["channel"],
+            "response_type": "in_channel",
             "text": "Scheduling is not yet setup."
             }
-    
-    requests.post(POST_MESSAGE_URL, data=response)
+   
+    return response
