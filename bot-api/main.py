@@ -13,7 +13,7 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 async def root():
     return {"Hello": "world"}
 
-@app.post("/events")
+@app.post("/api/v1.0/events")
 async def events(request: Request):
     req = await request.json()
     print(json.dumps(req, sort_keys=True, indent=4))
