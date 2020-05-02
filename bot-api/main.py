@@ -27,3 +27,17 @@ async def events(request: Request):
             }
     
     requests.post(POST_MESSAGE_URL, data=response)
+
+
+@app.post("/api/v1.0/schedule")
+async def events(request: Request):
+    req = await request.json()
+    print(json.dumps(req, sort_keys=True, indent=4))
+
+    response = {
+            "token": SLACK_BOT_TOKEN,
+            "channel": req["event"]["channel"],
+            "text": "Scheduling is not yet setup."
+            }
+    
+    requests.post(POST_MESSAGE_URL, data=response)
