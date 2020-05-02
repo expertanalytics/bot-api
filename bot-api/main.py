@@ -15,12 +15,15 @@ async def root():
 @app.post("/events")
 async def events(request: Request):
     req = await request.json()
-    print(json.dumps(req, indent=4))
+    print(json.dumps(req, sort_keys=True, indent=4))
     if "challenge" in req:
         return {"challenge": req["challenge"]}
 
-    return {
+    response = {
             "token": SLACK_BOT_TOKEN,
             "channel": req["event"]["channel"],
             "text": "hello world"
             }
+
+    print(response)
+    return response
