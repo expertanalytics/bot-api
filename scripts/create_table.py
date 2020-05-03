@@ -6,7 +6,6 @@ from sqlalchemy import (create_engine, Table, Column, Integer,
         String, Date)
 from sqlalchemy.ext.declarative import declarative_base
 
-sys.path.insert(0, "..")
 from bot_api.models import Event
 
 database_url = os.environ.get("DATABASE_URL")
