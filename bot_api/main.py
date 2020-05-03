@@ -97,5 +97,5 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
 
 
 sched = BackgroundScheduler()
-sched.add_job(ping_server, trigger="cron", minute="*/1")
+sched.add_job(ping_server, trigger="cron", minute="*/25")
 sched.start()
