@@ -62,8 +62,10 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
     # Switch a potential shorthand with the corresponding command
     cmd = models.shorthands.get(args.command, args.command)
 
+    was_raised = True
     try:
         response = models.commands[cmd]["command"](args, db)
+        was_raised = False
     except KeyError as e:
         return models.default_responses["INVALID_COMMAND"] 
     except UsageError:
@@ -81,6 +83,6 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
     except AlreadyCancelledError:
         response = models.default_responses["ALREADY_CANCELLED_ERROR"]
 
-    response_type = "ephemeral" if args.silent else "in_channel"
 
+    response_type = "ephemeral" if args.silent or was_raised else "in_channel"
     return {"text": response, "response_type": response_type}
