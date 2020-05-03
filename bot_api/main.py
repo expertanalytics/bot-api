@@ -107,7 +107,7 @@ def set_new_topic_if_not_set():
             "channel": channel,
     }
 
-    channel_info = requests.get(CHANNEL_INFO_URL, data=message)
+    channel_info = requests.get(CHANNEL_INFO_URL, data=message).json()
     print(channel_info)
     if channel_info["channel"]["topic"]["value"] != new_channel_topic:
         return requests.post(SET_TOPIC_URL, data=message)
