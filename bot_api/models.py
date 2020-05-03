@@ -56,8 +56,7 @@ def get_formatted_event(event: Event):
     if not event.what:
         response = f"{prettify_date(event.when)}: No presentation scheduled."
     elif not event.who:
-        return (
-                f"{prettify_date(event.when)}: "
+        return (f">{prettify_date(event.when)}: "
                 f"Event is cancelled due to {event.what}!")
     else:
         response = (
