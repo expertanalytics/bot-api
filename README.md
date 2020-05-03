@@ -18,3 +18,4 @@ DATABASE_URL=<from your hosted or local postgresql database>
 - Start a test server: `uvicorn bot_api.main:app --reload`.
 - `Procfile` contains run instructions for a Gunicorn/Uvicorn server (currently hosted on Heroku).
 - `runtime.txt` specifies the Python version for Heroku.
+- The postgres table (schedule of events) can be created with `scripts/create_table.py`. `yaml_to_db.py` translates a `.yaml` schedule and adds the schedule to the database. See `res/` for an example `.yaml` file (or just add events using the slack bot after it's set up).
