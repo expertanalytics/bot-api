@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from . import crud, models, schemas
+from . import crud, commands, models, schemas
 from .database import engine, SessionLocal
 from .errors import *
 
@@ -65,7 +65,7 @@ def post_msg_if_no_presenter():
     td = db_event.when - now
     if db_event.who:
         if td < datetime.timedelta(days=7):
-            message["text"] = models.list_next_event(None)
+            message["text"] = commands.list_next_event(None)
             return requests.post(POST_MESSAGE_URL, data=message)
         return
 
@@ -76,13 +76,13 @@ def post_msg_if_no_presenter():
     if td > datetime.timedelta(days=14):
         return
     elif td > datetime.timedelta(days=7):
-        message["text"] = models.default_responses["CALL_TO_ACTION"].format(
-                models.prettify_date(db_event.when), "in one week")
+        message["text"] = commands.default_responses["CALL_TO_ACTION"].format(
+                commands.prettify_date(db_event.when), "in one week")
 
         return requests.post(POST_MESSAGE_URL, data=message)
         
-    message["text"] = models.default_responses["CALL_TO_ACTION"].format(
-            models.prettify_date(db_event.when), "tonight")
+    message["text"] = commands.default_responses["CALL_TO_ACTION"].format(
+            commands.prettify_date(db_event.when), "tonight")
 
     db.close()
     return requests.post(POST_MESSAGE_URL, data=message)
@@ -99,7 +99,7 @@ def set_new_topic_if_not_set():
         return
 
     if db_event.who:
-        new_channel_topic = models.get_formatted_event(db_event)
+        new_channel_topic = commands.get_formatted_event(db_event)
     else:
         return
 
@@ -132,40 +132,40 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
     """Executes bot command if the command is known."""
 
     if not text:
-        return models.default_responses["INVALID_COMMAND"] 
+        return commands.default_responses["INVALID_COMMAND"] 
 
     try:
-        args = models.get_args_from_request(text)
+        args = commands.get_args_from_request(text)
     except ArgumentError as e:
         return {"text": str(e), "response_type": "ephemeral"}
     
     # Switch a potential shorthand with the corresponding command
-    cmd = models.shorthands.get(args.command, args.command)
+    cmd = commands.shorthands.get(args.command, args.command)
 
     was_raised = True
     try:
-        response = models.commands[cmd]["command"](args, db)
+        response = commands.commands[cmd]["command"](args, db)
         was_raised = False
     except KeyError as e:
-        response = models.default_responses["INVALID_COMMAND"] 
+        response = commands.default_responses["INVALID_COMMAND"] 
     except UsageError:
-        response = f"Usage error: {models.commands[cmd]['usage']}"
+        response = f"Usage error: {commands.commands[cmd]['usage']}"
     except InvalidDateError:
-        response = models.default_responses["INVALID_DATE_ERROR"]
+        response = commands.default_responses["INVALID_DATE_ERROR"]
     except InvalidEventError:
-        response = models.default_responses["INVALID_EVENT_ERROR"]
+        response = commands.default_responses["INVALID_EVENT_ERROR"]
     except MissingDateError:
-        response = models.default_responses["MISSING_DATE_ERROR"]
+        response = commands.default_responses["MISSING_DATE_ERROR"]
     except PastDateError:
-        response = models.default_responses["PAST_DATE_ERROR"]
+        response = commands.default_responses["PAST_DATE_ERROR"]
     except ExistingDateError:
-        response = models.default_responses["EXISTING_DATE_ERROR"]
+        response = commands.default_responses["EXISTING_DATE_ERROR"]
     except AlreadyScheduledError:
-        response = models.default_responses["ALREADY_SCHEDULED_ERROR"]
+        response = commands.default_responses["ALREADY_SCHEDULED_ERROR"]
     except AlreadyClearedError:
-        response = models.default_responses["ALREADY_CLEARED_ERROR"]
+        response = commands.default_responses["ALREADY_CLEARED_ERROR"]
     except AlreadyCancelledError:
-        response = models.default_responses["ALREADY_CANCELLED_ERROR"]
+        response = commands.default_responses["ALREADY_CANCELLED_ERROR"]
 
 
     response_type = "ephemeral" if args.silent or was_raised else "in_channel"
