@@ -67,33 +67,19 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
     except KeyError as e:
         return models.default_responses["INVALID_COMMAND"] 
     except UsageError:
-        response = {
-                "text": f"Usage error: {models.commands[cmd]['usage']}",
-                "response_type": "ephemeral"}
+        response = f"Usage error: {models.commands[cmd]['usage']}"
     except InvalidDateError:
-        response = {
-                "text": models.default_responses["INVALID_DATE_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["INVALID_DATE_ERROR"]
     except MissingDateError:
-        response = {
-                "text": models.default_responses["MISSING_DATE_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["MISSING_DATE_ERROR"]
     except PastDateError:
-        response = {
-                "text": models.default_responses["PAST_DATE_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["PAST_DATE_ERROR"]
     except AlreadyScheduledError:
-        response = {
-                "text": models.default_responses["ALREADY_SCHEDULED_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["ALREADY_SCHEDULED_ERROR"]
     except AlreadyClearedError:
-        response = {
-                "text": models.default_responses["ALREADY_CLEARED_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["ALREADY_CLEARED_ERROR"]
     except AlreadyCancelledError:
-        response = {
-                "text": models.default_responses["ALREADY_CANCELLED_ERROR"],
-                "response_type": "ephemeral"}
+        response = models.default_responses["ALREADY_CANCELLED_ERROR"]
 
     response_type = "ephemeral" if args.silent else "in_channel"
 
