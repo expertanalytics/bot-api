@@ -21,6 +21,8 @@ app = FastAPI()
 logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
+FAGDAG_CHANNEL_ID = "C0YMPPHT6"
+TEST_CHANNEL_ID = "CP3SWEVHT"
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
@@ -36,6 +38,46 @@ def get_db():
 def ping_server():
     req = requests.get(PING_ENDPOINT_URL)
     logger.info(f"Pinged server, response: {req}")
+
+
+def post_msg_if_no_presenter():
+    channel = TEST_CHANNEL_ID
+    # channel = FAGDAG_CHANNEL_ID
+    message = {
+            "channel": channel,
+            "text": "",
+            "token": SLACK_BOT_TOKEN,
+            }
+
+    now = datetime.now().date()
+    db_event = crud.get_closest_event(db, when=datetime.date.today())
+
+    if not db_event.when:
+        return
+
+    td = db_event.when - now
+    if db_event.who:
+        if td < datetime.timedelta(days=7):
+            message["text"] = models.list_next_event(None)
+            return requests.post(POST_MESSAGE_URL, data=message)
+        return
+
+    # If what but not who: event is cancelled so we return
+    if db_event.what and not db_event.who:
+        return
+
+    if td > datetime.timedelta(days=14):
+        return
+    elif td > datetime.timedelta(days=7):
+        message["text"] = models.default_responses["CALL_TO_ACTION"].format(
+                prettify_date(db_event.when), "in one week")
+
+        return web_client.chat_postMessage(**message)
+        
+    message["text"] = models.default_responses["CALL_TO_ACTION"].format(
+            models.prettify_date(db_event.when), "tonight")
+
+    return requests.post(POST_MESSAGE_URL, data=message)
 
 
 @app.get("/api/v1.0/ping")
@@ -98,4 +140,6 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
 
 sched = BackgroundScheduler()
 sched.add_job(ping_server, trigger="cron", minute="*/25")
+# sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
+sched.add_job(post_msg_if_no_presenter, trigger="cron", second="*/20")
 sched.start()
