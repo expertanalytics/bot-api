@@ -2,7 +2,8 @@
 FastAPI-based Python api for slack bots. Currently hosted on Heroku using Gunicorn/Uvicorn.
 
 ## Setup
-- Clone the repo (everything below is done in the root directory (`bot-api`).
+- Clone the repo.
+- Everything below is done in the root directory of the repo, so `cd bot-api`.
 - Set up at virtualenv and install requirements:
 ```bash
 python3.8 -m venv venv
