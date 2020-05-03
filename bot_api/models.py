@@ -82,7 +82,7 @@ def get_args_from_request(request):
     cmd_parser.add_argument("--what", nargs="+", type=str)
     cmd_parser.add_argument("--when", nargs="+", type=str)
     cmd_parser.add_argument("--event", type=str)
-    cmd_parser.add_argument("--silent", action="store_true")
+    cmd_parser.add_argument("--silent", "-s", action="store_true")
 
     args = cmd_parser.parse_args(request.split())
 
