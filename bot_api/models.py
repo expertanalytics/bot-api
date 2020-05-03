@@ -79,6 +79,7 @@ def get_args_from_request(request):
     cmd_parser.add_argument("--what", type=str)
     cmd_parser.add_argument("--when", type=str)
     cmd_parser.add_argument("--event", type=str)
+    cmd_parser.add_argument("--silent", action="store_true")
 
     return cmd_parser.parse_args(request.split())
 
@@ -218,12 +219,15 @@ def list_upcoming_events(args, db: Session = None):
     return "\n".join(
             [get_formatted_event(event) for event in db_events])
 
+
 def list_shorthands(args, db: Session = None):
     return "\n".join([f">{c}: `{s}`" for s,c in shorthands.items()])
+
 
 def list_help(args, db: Session = None):
     return "\n".join(
             [f"{y['usage']}\n>{y['help_text']}\n" for x,y in commands.items()])
+
 
 def get_unique_shorthand(i, key, short_keys, long_keys):
     """

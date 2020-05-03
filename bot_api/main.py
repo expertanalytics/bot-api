@@ -95,4 +95,6 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
                 "text": models.default_responses["ALREADY_CANCELLED_ERROR"],
                 "response_type": "ephemeral"}
 
-    return response
+    response_type = "ephemeral" if args.silent else "in_channel"
+
+    return {"text": response, "response_type": response_type}
