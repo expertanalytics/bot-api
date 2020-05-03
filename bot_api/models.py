@@ -54,6 +54,7 @@ def prettify_date(date):
     return date.strftime('%a %-d %b')
 
 
+
 def get_formatted_event(event: Event):
     is_fagdag = event.event_type == "fagdag"
 
@@ -77,26 +78,38 @@ def get_args_from_request(request):
 
     cmd_parser.add_argument("command", type=str)
     
-    cmd_parser.add_argument("--who", type=str)
-    cmd_parser.add_argument("--what", type=str)
-    cmd_parser.add_argument("--when", type=str)
+    cmd_parser.add_argument("--who", nargs="+", type=str)
+    cmd_parser.add_argument("--what", nargs="+", type=str)
+    cmd_parser.add_argument("--when", nargs="+", type=str)
     cmd_parser.add_argument("--event", type=str)
     cmd_parser.add_argument("--silent", action="store_true")
 
-    return cmd_parser.parse_args(request.split())
+    args = cmd_parser.parse_args(request.split())
+
+    # Combine list input into space separated strings
+    args.who = " ".join(args.who) if args.who else None
+    args.what = " ".join(args.what) if args.what else None
+    args.when = " ".join(args.when) if args.when else None
+
+    return args
 
 
 def schedule_new_event(args, db: Session = None):
     if not args.who or not args.when or not args.what:
         raise UsageError
 
-    when = dateparser.parse(args.when) 
+    when = dateparser.parse(args.when)
     if not when:
         raise InvalidDateError
 
-    db_event = crud.get_event_by_date(db, when=when)
+    when = when.date()
+    db_event = crud.get_closest_event(db, when=when)
     if not db_event:
         raise MissingDateError
+
+    when = db_event.when
+    if datetime.datetime.now().date() > when:
+        raise PastDateError
 
     if db_event.what and db_event.who:
         raise AlreadyScheduledError
@@ -104,7 +117,7 @@ def schedule_new_event(args, db: Session = None):
     if db_event.what:
         raise AlreadyCancelledError
 
-    crud.update_event(db=db, when=when, what=args.what, who=args.who) 
+    crud.update_event(db=db, db_event=db_event, what=args.what, who=args.who) 
    
     return f"Successfully scheduled {get_formatted_event(db_event)}"
 
@@ -117,14 +130,18 @@ def clear_event(args, db: Session = None):
     if not when:
         raise InvalidDateError
 
+    when = when.date()
     db_event = crud.get_event_by_date(db, when=when)
     if not db_event:
         raise MissingDateError
 
+    if datetime.datetime.now().date() > when:
+        raise PastDateError
+
     if not db_event.what and not db_event.who:
         raise AlreadyClearedError
 
-    crud.update_event(db=db, when=when, what=None, who=None) 
+    crud.update_event(db=db, db_event=db_event, what=None, who=None) 
    
     return f"Successfully cleared {prettify_date(when)}"
 
@@ -137,14 +154,18 @@ def cancel_event(args, db: Session = None):
     if not when:
         raise InvalidDateError
 
+    when = when.date()
     db_event = crud.get_event_by_date(db, when=when)
     if not db_event:
         raise MissingDateError
 
+    if datetime.datetime.now().date() > when:
+        raise PastDateError
+
     if db_event.what and not db_event.who:
         raise AlreadyCancelledError
 
-    crud.update_event(db=db, when=when, what=args.what, who=None) 
+    crud.update_event(db=db, db_event=db_event, what=args.what, who=None) 
    
     return f"Successfully cancelled {get_formatted_event(db_event)}"
 
