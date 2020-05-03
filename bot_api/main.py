@@ -17,7 +17,7 @@ from .errors import *
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(use_reloader=False)
 logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
