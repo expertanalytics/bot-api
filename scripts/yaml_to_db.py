@@ -5,7 +5,6 @@ from sqlalchemy import (create_engine, MetaData, Table)
 from sqlalchemy.orm import sessionmaker
 import yaml
 
-sys.path.insert(0, "..")
 from bot_api.models import Event
 
 
