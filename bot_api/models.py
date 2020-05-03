@@ -87,9 +87,9 @@ def get_args_from_request(request):
     args = cmd_parser.parse_args(request.split())
 
     # Combine list input into space separated strings
-    args.who = " ".join(args.who) if args.who else None
-    args.what = " ".join(args.what) if args.what else None
-    args.when = " ".join(args.when) if args.when else None
+    args.who = " ".join(args.who).replace("\"", "") if args.who else None
+    args.what = " ".join(args.what).replace("\"", "") if args.what else None
+    args.when = " ".join(args.when).replace("\"", "") if args.when else None
 
     return args
 
