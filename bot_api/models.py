@@ -157,18 +157,18 @@ def add_new_date(args, db: Session = None):
 
 
     if args.event not in event_types:
-        return default_responses["MISSING_EVENT_ERROR"]
+        raise MissingDateError
 
     if not when:
         raise InvalidDateError
 
     when = when.date()
     if datetime.datetime.now().date() > when:
-        return default_responses["PAST_DATE_ERROR"]
+        raise PastDateError
     
     db_event = crud.get_event_by_date(db, when=when)
     if db_event:
-        return default_responses["EXISTING_DATE_ERROR"]
+        raise ExistingDateError
 
     crud.create_event(
             db=db, event_type=args.event, when=when)

@@ -4,6 +4,9 @@ class UsageError(Exception):
 class InvalidDateError(Exception):
     pass
 
+class InvalidDateError(Exception):
+    pass
+
 class PastDateError(Exception):
     pass
 
@@ -17,6 +20,9 @@ class AlreadyClearedError(Exception):
     pass
 
 class AlreadyCancelledError(Exception):
+    pass
+
+class ExistingDateError(Exception):
     pass
 
 class ArgumentError(Exception):
