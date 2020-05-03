@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 SET_TOPIC_URL = "https://slack.com/api/conversations.setTopic"
+CHANNEL_INFO_URL = "https://slack.com/api/channels.info"
 
 FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
@@ -101,11 +102,12 @@ def set_new_topic_if_not_set():
         return
 
     message = {
-            "token": SLACK_USER_TOKEN,
+            "token": SLACK_BOT_TOKEN,
             "topic": new_channel_topic,
             "channel": channel,
     }
 
+    # channel_info = requests.post(CHANNEL_INFO_URL, data=message)
     # if cur_channel_topic != new_channel_topic:
     return requests.post(SET_TOPIC_URL, data=message)
 
