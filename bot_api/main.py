@@ -21,10 +21,13 @@ app = FastAPI(use_reloader=False)
 logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
+SET_TOPIC_URL = "https://slack.com/api/conversations.setTopic"
+
 FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
+SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
 
 # Dependency
 def get_db():
@@ -80,6 +83,34 @@ def post_msg_if_no_presenter():
 
     db.close()
     return requests.post(POST_MESSAGE_URL, data=message)
+
+
+def set_new_topic_if_not_set():
+    db = SessionLocal()
+    db_event = crud.get_closest_event(db, when=datetime.date.today())
+    channel = TEST_CHANNEL_ID
+
+    now = datetime.datetime.now().date()
+    next_date = get_next_date(schedule, now)
+
+    if not next_date:
+        return
+
+    if db_event.who:
+        new_channel_topic = (
+                f"*{prettify_date(next_date)}*: "
+                f"{parse_event_content(schedule, next_date, now)}")
+    else:
+        return
+
+    message = {
+            "token": SLACK_USER_TOKEN,
+            "topic": new_channel_topic,
+            "channel": channel,
+    }
+
+    # if cur_channel_topic != new_channel_topic:
+    return requests.post(SET_TOPIC_URL, data=message)
 
 
 @app.get("/api/v1.0/ping")
@@ -142,6 +173,7 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
 
 sched = BackgroundScheduler()
 sched.add_job(ping_server, trigger="cron", minute="*/25")
-# sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
-sched.add_job(post_msg_if_no_presenter, trigger="cron", second="*/20")
+sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
+# sched.add_job(set_new_topic_if_not_set, trigger="cron", day="*", hour=0, minute=0)
+sched.add_job(set_new_topic_if_not_set, trigger="cron", second=20)
 sched.start()
