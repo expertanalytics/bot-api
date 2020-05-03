@@ -41,7 +41,9 @@ def ping_server():
 
 
 def post_msg_if_no_presenter():
-    db = next(get_db())
+    db = SessionLocal()
+    db_event = crud.get_closest_event(db, when=datetime.date.today())
+
     channel = TEST_CHANNEL_ID
     # channel = FAGDAG_CHANNEL_ID
     message = {
@@ -51,8 +53,6 @@ def post_msg_if_no_presenter():
             }
 
     now = datetime.datetime.now().date()
-    db_event = crud.get_closest_event(db, when=datetime.date.today())
-
     if not db_event.when:
         return
 
@@ -78,6 +78,7 @@ def post_msg_if_no_presenter():
     message["text"] = models.default_responses["CALL_TO_ACTION"].format(
             models.prettify_date(db_event.when), "tonight")
 
+    db.close()
     return requests.post(POST_MESSAGE_URL, data=message)
 
 
