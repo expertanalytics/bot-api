@@ -34,7 +34,7 @@ def get_db():
 
 # Keep Heroku server alive
 def ping_server():
-    req = requests.post(EVENTS_ENDPOINT_URL, data={"hei": "hei"})
+    req = requests.post(EVENTS_ENDPOINT_URL, data={"challenge": "hei"})
     logger.info(f"Pinged server, response: {req}")
 
 
