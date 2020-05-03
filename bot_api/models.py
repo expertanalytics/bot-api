@@ -28,6 +28,10 @@ default_responses = {
         "ALREADY_CLEARED_ERROR": "Error: This event is already empty.",
         "ALREADY_SCHEDULED_ERROR": (
             "Error: A presentation has already been scheduled on this date."),
+        "CALL_TO_ACTION": (
+            "No one is scheduled for the next presentation "
+            "({0}). "
+            "The due date is *{1}* at 23:59."),
         }
 
 
