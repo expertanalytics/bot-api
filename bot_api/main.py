@@ -26,6 +26,9 @@ CHANNEL_INFO_URL = "https://slack.com/api/conversations.info"
 
 FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
+CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
+
+
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
@@ -48,8 +51,7 @@ def post_msg_if_no_presenter():
     db = SessionLocal()
     db_event = crud.get_closest_event(db, when=datetime.date.today())
 
-    channel = TEST_CHANNEL_ID
-    # channel = FAGDAG_CHANNEL_ID
+    channel = CURRENT_CHANNEL
     message = {
             "channel": channel,
             "text": "",
@@ -89,7 +91,7 @@ def post_msg_if_no_presenter():
 def set_new_topic_if_not_set():
     db = SessionLocal()
     db_event = crud.get_closest_event(db, when=datetime.date.today())
-    channel = TEST_CHANNEL_ID
+    channel = CURRENT_CHANNEL
 
     now = datetime.datetime.now().date()
 
