@@ -12,9 +12,10 @@ database_url = os.environ.get("DATABASE_URL")
 engine = create_engine(database_url, echo=True)
 table_name = "events"
 
-try:
-    Event.__table__.drop(engine)
-except sqlalchemy.exc.ProgrammingError as e:
-    print(e)
+if __name__ == "__main__":
+    try:
+        Event.__table__.drop(engine)
+    except sqlalchemy.exc.ProgrammingError as e:
+        print(e)
 
-Event.metadata.create_all(engine)
+    Event.metadata.create_all(engine)
