@@ -26,5 +26,5 @@ and adds the schedule to the database.
 See `res/` for an example `.yaml` file 
 (or just add events using the slack bot after it's set up).
 
-After the uvicorn server has been started, visit the automated documentation at [localhost:8000/docs].
+After the uvicorn server has been started, visit the [automated documentation](localhost:8000/docs).
 It also let's you test out the api endpoints.
