@@ -2,7 +2,7 @@
 FastAPI-based Python api for slack bots. Currently hosted on Heroku using Gunicorn/Uvicorn.
 
 ## Setup
-- Clone the repo.
+- Clone the repo (everything below is done in the root directory (`bot-api`).
 - Set up at virtualenv and install requirements:
 ```bash
 python3.8 -m venv venv
@@ -21,9 +21,11 @@ DATABASE_URL=<from your hosted or local postgresql database>
 - `runtime.txt` specifies the Python version for Heroku.
 - Install the bot-api Python package, `pip install -e .`.
 - The postgres table (schedule of events) can be created with 
-`scripts/create_table.py`. `yaml_to_db.py` translates a `.yaml` schedule 
-and adds the schedule to the database. 
-See `res/` for an example `.yaml` file 
+```bash
+python scripts/create_table.py
+```
+- `python yaml_to_db.py /path/to/schedules.yaml` translates a `.yaml` schedule 
+and adds the schedule to the database. See `res/` for an example `.yaml` file 
 (or just add events using the slack bot after it's set up).
 
 After the uvicorn server has been started, visit the [automated documentation](http://localhost:8000/docs).
