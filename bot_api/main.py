@@ -46,7 +46,7 @@ async def events(request: Request):
 
 
 @app.post("/api/v1.0/schedule")
-async def schedule(channel_id: str = Form(...)):
+async def schedule(text: str = Form(...)):
 
     args = models.get_args_from_request(text)
 
