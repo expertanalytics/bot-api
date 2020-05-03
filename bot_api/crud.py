@@ -14,7 +14,7 @@ def create_event(db: Session, when: date, event_type: str):
 
 
 def remove_event(db: Session, when: date):
-    db_event = db.query(models.Event).filter(models.Event.when == when).first()
+    db_event = get_event_by_date(db, when)
     db.delete(db_event)
     db.commit()
     return db_event
