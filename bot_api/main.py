@@ -173,6 +173,5 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
 sched = BackgroundScheduler()
 sched.add_job(ping_server, trigger="cron", minute="*/25")
 sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
-# sched.add_job(set_new_topic_if_not_set, trigger="cron", day="*", hour=0, minute=0)
-sched.add_job(set_new_topic_if_not_set, trigger="cron", second=20)
+sched.add_job(set_new_topic_if_not_set, trigger="cron", day="*", hour=0, minute=0)
 sched.start()
