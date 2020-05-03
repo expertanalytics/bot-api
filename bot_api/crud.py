@@ -19,6 +19,13 @@ def remove_event(db: Session, when: date):
     db.commit()
     return db_event
 
+def update_event(db: Session, when: date, who: str, what: str):
+    db_event = get_event_by_date(db, when)
+    db_event.who = who
+    db_event.what = what
+    db.commit()
+    return db_event
+
 
 def get_event_by_date(db: Session, when: str):
     return db.query(models.Event).filter(models.Event.when == when).first()
