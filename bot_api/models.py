@@ -22,7 +22,7 @@ default_responses = {
         "SCHEDULE_EMPTY_ERROR": (
             "Error: The upcoming schedule is empty. Please add some dates."),
         "MISSING_DATE_ERROR": (
-            "The specified date is not in the schedule. "
+            "Error: The specified date is not in the schedule. "
             "Use the `add` command if you want to add a new date."),
         "ALREADY_CANCELLED_ERROR": (
             "Error: This event has (already) been cancelled."),
