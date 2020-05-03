@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 SET_TOPIC_URL = "https://slack.com/api/conversations.setTopic"
-CHANNEL_INFO_URL = "https://slack.com/api/channels.info"
+CHANNEL_INFO_URL = "https://slack.com/api/conversations.info"
 
 FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
