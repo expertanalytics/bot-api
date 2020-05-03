@@ -21,7 +21,7 @@ app = FastAPI()
 logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
-EVENTS_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/events"
+PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 # Dependency
@@ -34,8 +34,13 @@ def get_db():
 
 # Keep Heroku server alive
 def ping_server():
-    req = requests.post(EVENTS_ENDPOINT_URL, data=JSONResponse({"challenge": "hei"}))
+    req = requests.get(PING_ENDPOINT_URL)
     logger.info(f"Pinged server, response: {req}")
+
+
+@app.get("/api/v1.0/ping")
+async def ping():
+    return 200
 
 
 @app.post("/api/v1.0/events")
@@ -44,8 +49,6 @@ async def events(request: Request):
     logger.info(json.dumps(req, sort_keys=True, indent=4))
     if "challenge" in req:
         return {"challenge": req["challenge"]}
-
-    return 200
 
 
 @app.post("/api/v1.0/command")
