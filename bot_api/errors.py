@@ -1,7 +1,7 @@
 class UsageError(Exception):
     pass
 
-class InvalidDateError(Exception):
+class InvalidEventError(Exception):
     pass
 
 class InvalidDateError(Exception):

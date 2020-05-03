@@ -14,7 +14,6 @@ event_types = ["fagdag", "formiddag"]
 default_responses = {
         "NO_EVENTS": "No upcoming events.",
         "INVALID_DATE_ERROR": "Error: Unable to parse date.",
-        "MISSING_EVENT_ERROR": "Error: No event specified.",
         "EXISTING_DATE_ERROR": "Error: Date already in schedule",
         "PAST_DATE_ERROR": "Error: Date is in the past.",
         "INVALID_EVENT_ERROR": (
@@ -157,7 +156,7 @@ def add_new_date(args, db: Session = None):
 
 
     if args.event not in event_types:
-        raise MissingDateError
+        raise InvalidEventError
 
     if not when:
         raise InvalidDateError

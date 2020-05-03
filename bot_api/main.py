@@ -72,6 +72,8 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
         response = f"Usage error: {models.commands[cmd]['usage']}"
     except InvalidDateError:
         response = models.default_responses["INVALID_DATE_ERROR"]
+    except InvalidEventError:
+        response = models.default_responses["INVALID_EVENT_ERROR"]
     except MissingDateError:
         response = models.default_responses["MISSING_DATE_ERROR"]
     except PastDateError:
