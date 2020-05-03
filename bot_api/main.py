@@ -8,6 +8,7 @@ import requests
 from fastapi import (FastAPI, Request, Form, Depends) 
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from . import crud, models, schemas
 from .database import engine, SessionLocal
@@ -20,6 +21,7 @@ app = FastAPI()
 logger = logging.getLogger(__name__)
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
+EVENTS_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/events"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 # Dependency
@@ -30,6 +32,11 @@ def get_db():
     finally:
         db.close()
 
+# Keep Heroku server alive
+def ping_server():
+    req = requests.post(EVENTS_ENDPOINT_URL, data={})
+    logger.info(f"Pinged server, response: {req}")
+
 
 @app.post("/api/v1.0/events")
 async def events(request: Request):
@@ -38,13 +45,7 @@ async def events(request: Request):
     if "challenge" in req:
         return {"challenge": req["challenge"]}
 
-    response = {
-            "token": SLACK_BOT_TOKEN,
-            "channel": req["event"]["channel"],
-            "text": "hello world"
-            }
-    
-    requests.post(POST_MESSAGE_URL, data=response)
+    return 200
 
 
 @app.post("/api/v1.0/command")
@@ -90,3 +91,8 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
 
     response_type = "ephemeral" if args.silent or was_raised else "in_channel"
     return {"text": response, "response_type": response_type}
+
+
+sched = BackgroundScheduler()
+sched.add_job(ping_server, trigger="cron", minute="*/1")
+sched.start()
