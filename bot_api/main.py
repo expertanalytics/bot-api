@@ -91,15 +91,12 @@ def set_new_topic_if_not_set():
     channel = TEST_CHANNEL_ID
 
     now = datetime.datetime.now().date()
-    next_date = get_next_date(schedule, now)
 
-    if not next_date:
+    if not db_event.when:
         return
 
     if db_event.who:
-        new_channel_topic = (
-                f"*{prettify_date(next_date)}*: "
-                f"{parse_event_content(schedule, next_date, now)}")
+        new_channel_topic = models.get_formatted_event(db_event)
     else:
         return
 
