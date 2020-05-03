@@ -49,7 +49,7 @@ def post_msg_if_no_presenter():
             "token": SLACK_BOT_TOKEN,
             }
 
-    now = datetime.now().date()
+    now = datetime.datetime.now().date()
     db_event = crud.get_closest_event(db, when=datetime.date.today())
 
     if not db_event.when:
