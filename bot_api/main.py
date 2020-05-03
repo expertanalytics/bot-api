@@ -41,6 +41,7 @@ def ping_server():
 
 
 def post_msg_if_no_presenter():
+    db = next(get_db())
     channel = TEST_CHANNEL_ID
     # channel = FAGDAG_CHANNEL_ID
     message = {
@@ -70,9 +71,9 @@ def post_msg_if_no_presenter():
         return
     elif td > datetime.timedelta(days=7):
         message["text"] = models.default_responses["CALL_TO_ACTION"].format(
-                prettify_date(db_event.when), "in one week")
+                models.prettify_date(db_event.when), "in one week")
 
-        return web_client.chat_postMessage(**message)
+        return requests.post(POST_MESSAGE_URL, data=message)
         
     message["text"] = models.default_responses["CALL_TO_ACTION"].format(
             models.prettify_date(db_event.when), "tonight")
