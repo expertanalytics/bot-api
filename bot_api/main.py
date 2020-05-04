@@ -28,10 +28,10 @@ FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
 CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
 
-
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
+
 
 # Dependency
 def get_db():
@@ -41,6 +41,7 @@ def get_db():
     finally:
         db.close()
 
+        
 # Keep Heroku server alive
 def ping_server():
     req = requests.get(PING_ENDPOINT_URL)
