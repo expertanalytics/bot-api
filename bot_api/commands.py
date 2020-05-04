@@ -8,6 +8,7 @@ from . import crud
 from .errors import *
 from .models import Event
 
+
 event_types = ["fagdag", "formiddag"]
 default_responses = {
         "NO_EVENTS": "No upcoming events.",
@@ -41,7 +42,6 @@ class ArgumentParser(ArgumentParser):
 
 def prettify_date(date):
     return date.strftime('%a %-d %b')
-
 
 
 def get_formatted_event(event: Event):
