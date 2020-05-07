@@ -31,3 +31,9 @@ and adds the schedule to the database. See `res/` for an example `.yaml` file
 
 After the uvicorn server has been started, visit the [automated documentation](http://localhost:8000/docs).
 It also let's you test out the api endpoints.
+
+## Testing
+From repo root dir
+```bash
+pytest
+```
