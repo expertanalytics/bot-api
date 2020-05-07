@@ -173,7 +173,7 @@ async def command(text: str = Form(...), db: Session = Depends(get_db)):
     return {"text": response, "response_type": response_type}
 
 
-sched = BackgroundScheduler()
+sched = BackgroundScheduler(timezone="Europe/Oslo")
 sched.add_job(ping_server, trigger="cron", minute="*/25")
 sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
 sched.add_job(set_new_topic_if_not_set, trigger="cron", day="*", hour=0, minute=0)
