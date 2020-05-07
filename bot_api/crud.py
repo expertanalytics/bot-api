@@ -14,6 +14,7 @@ def _nearest(items, pivot):
 
     return min(items, key=lambda x: abs(x.when - pivot))
 
+
 def create_event(db: Session, when: date, event_type: str):
     db_event = models.Event(when=when, event_type=event_type)
     db.add(db_event)
