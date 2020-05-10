@@ -20,7 +20,6 @@ Install the bot-api Python package
 pip install -e .
 ```
 
-
 ### Source environmental variables
 Fill out the variables below and add to a `.env` file, then `source .env`.
 ```bash
@@ -35,14 +34,18 @@ Start a test server
 uvicorn bot_api.main:app --reload
 ```
 
-
 ### Database
+The current edition of the bot-api uses a free-tier PostgreSQL. 
+Setting up a postgres database is outside the scope of this readme.
+The following therefore relies on a database already being set up,
+and the `DATABASE_URL` environmental variable being set correctly.
+
 The postgres table (schedule of events) can be created with 
 ```bash
 python scripts/create_table.py
 ```
 
-Initiate a 
+Add additional data using the following command
 ```bash
 python yaml_to_db.py /path/to/schedules.yaml
 ``` 
