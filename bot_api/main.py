@@ -128,6 +128,11 @@ async def events(request: Request):
         return {"challenge": req["challenge"]}
 
 
+@app.post("/api/v1.0/upcoming")
+async def upcoming(db: Session = Depends(get_db)):
+    return commands.commands["upcoming"]["command"](None, db)
+
+
 @app.post("/api/v1.0/command")
 async def command(text: str = Form(...), db: Session = Depends(get_db)):
     """Executes bot command if the command is known."""
