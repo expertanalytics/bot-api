@@ -20,6 +20,7 @@ def create_event(db: Session, when: date, event_type: str):
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
+
     return db_event
 
 
@@ -27,12 +28,15 @@ def remove_event(db: Session, when: date):
     db_event = get_event_by_date(db, when)
     db.delete(db_event)
     db.commit()
+
     return db_event
+
 
 def update_event(db: Session, db_event: models.Event, who: str, what: str):
     db_event.who = who
     db_event.what = what
     db.commit()
+
     return db_event
 
 
