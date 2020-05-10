@@ -1,6 +1,7 @@
 from sqlalchemy import (Column, Integer, String, Date)
+from sqlalchemy.ext.declarative import declarative_base
 
-from .database import Base
+Base = declarative_base()
 
 
 class Event(Base):
