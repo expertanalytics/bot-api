@@ -130,7 +130,8 @@ async def events(request: Request):
 
 @app.post("/api/v1.0/upcoming")
 async def upcoming(db: Session = Depends(get_db)):
-    return commands.commands["upcoming"]["command"](None, db)
+    return {"text": commands.commands["upcoming"]["command"](None, db), 
+            "response_type": "ephemeral"}
 
 
 @app.post("/api/v1.0/command")
