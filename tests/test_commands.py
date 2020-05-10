@@ -6,10 +6,8 @@ from mock import Mock
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from bot_api import main, commands, models, crud
+from bot_api import commands, models, crud
 
-
-client = TestClient(main.app)
 
 
 def test_prettify_date():
