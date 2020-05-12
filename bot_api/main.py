@@ -62,8 +62,9 @@ def validate_request(request):
     slack_signature = request.headers['X-Slack-Signature']
     if my_signature == slack_signature:
         return True
-
-    return False
+    else:
+        logger.error("Request failed: {my_signature} != {slack_signature}")
+        return False
 
         
 # Keep Heroku server alive
