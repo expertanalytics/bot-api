@@ -161,8 +161,10 @@ async def upcoming(db: Session = Depends(get_db)):
 async def command(request: Request, db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
-    timestamp = request.headers['X-Slack-Request-Timestamp']
-    slack_signature = request.headers['X-Slack-Signature']
+    timestamp = request.headers.get('X-Slack-Request-Timestamp')
+    slack_signature = request.headers.get('X-Slack-Signature')
+    if not timestamp or not slack_signature:
+        return
 
     request_body = await request.body()
     form = await request.form()
