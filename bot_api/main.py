@@ -163,13 +163,13 @@ async def upcoming(db: Session = Depends(get_db)):
 @app.post("/api/v1.0/command")
 async def command(
         request: Request, 
-        body: str = Body(...),
-        text: str = Form(...), 
         db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
-    if not text:
-        return commands.default_responses["INVALID_COMMAND"] 
+    # if not text:
+    #     return commands.default_responses["INVALID_COMMAND"] 
+    req = await request.json()
+    logger.error(req)
 
     if not validate_request(request, body):
         return
