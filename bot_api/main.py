@@ -52,9 +52,11 @@ def validate_request(request_body, timestamp, slack_signature):
     #     # It could be a replay attack, so let's ignore it.
     #     return False
 
+    body = request_body.decode()
     logger.error(request_body)
+    logger.error(body)
     logger.error(timestamp)
-    sig_basestring = f"v0:{timestamp}:{request_body}".encode("utf-8")
+    sig_basestring = f"v0:{timestamp}:{body}".encode("utf-8")
     logger.error(sig_basestring)
     computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
                             sig_basestring,
