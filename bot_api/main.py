@@ -52,8 +52,6 @@ def validate_request(request_body, timestamp, slack_signature):
     #     # It could be a replay attack, so let's ignore it.
     #     return False
 
-    body = request_body.decode("utf-8")
-    timestamp = timestamp.decode("utf-8")
     logger.error(body)
     logger.error(timestamp)
     sig_basestring = f"v0:{timestamp}:{body}".encode("utf-8")
