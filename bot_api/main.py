@@ -45,8 +45,7 @@ def get_db():
     finally:
         db.close()
 
-def validate_request(request):
-    request_body = request.body()
+def validate_request(request_body):
     logger.error(request_body)
     timestamp = request.headers['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
@@ -170,7 +169,8 @@ async def command(
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
-    if not validate_request(request):
+    request_body = await request.body()
+    if not validate_request(request_body):
         return
 
     try:
