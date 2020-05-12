@@ -45,10 +45,8 @@ def get_db():
     finally:
         db.close()
 
-def validate_request(request):
-    request_body = request.body()
+def validate_request(request_body, timestamp, slack_signature):
     logger.error(request_body)
-    timestamp = request.headers['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
     #     # The request timestamp is more than five minutes from local time.
     #     # It could be a replay attack, so let's ignore it.
@@ -60,7 +58,6 @@ def validate_request(request):
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = f"v0={computed_hash}"
 
-    slack_signature = request.headers['X-Slack-Signature']
     if hmac.compare_digest(my_signature, slack_signature):
         return True
     else:
@@ -168,13 +165,14 @@ async def command(
         db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
-    req = await request.body()
-    logger.error(req)
+    timestamp = request.headers['X-Slack-Request-Timestamp']
+    slack_signature = request.headers['X-Slack-Signature']
+    request_body = await request.body()
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
-    if not validate_request(req):
+    if not validate_request(request_body, timestamp, slack_signature):
         return
 
     try:
