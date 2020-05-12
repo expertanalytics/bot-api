@@ -169,7 +169,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
 
     request_body = await request.body()
     form = await request.form()
-    text = form["text"]
+    text = form.get("text")
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
