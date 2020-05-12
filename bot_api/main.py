@@ -173,7 +173,7 @@ async def command(
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
-    if not validate_request(body, timestamp, slack_signature):
+    if not validate_request(request_body, timestamp, slack_signature):
         return
 
     try:
