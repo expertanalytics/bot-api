@@ -46,6 +46,9 @@ def get_db():
         db.close()
 
 def validate_request(request_body, timestamp, slack_signature):
+    if not timestamp or not slack_signature:
+        return False
+
     if abs(time.time() - int(timestamp)) > 60 * 5:
         # The request timestamp is more than five minutes from local time.
         # It could be a replay attack, so let's ignore it.
@@ -163,8 +166,6 @@ async def command(request: Request, db: Session = Depends(get_db)):
 
     timestamp = request.headers.get('X-Slack-Request-Timestamp')
     slack_signature = request.headers.get('X-Slack-Signature')
-    if not timestamp or not slack_signature:
-        return
 
     request_body = await request.body()
     form = await request.form()
@@ -174,7 +175,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
         return commands.default_responses["INVALID_COMMAND"] 
 
     if not validate_request(request_body, timestamp, slack_signature):
-        return
+        return {"text": "Invalid request."}
 
     try:
         args = commands.get_args_from_request(text)
