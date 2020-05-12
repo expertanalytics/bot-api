@@ -8,7 +8,7 @@ from datetime import date
 import logging
 
 import requests
-from fastapi import (FastAPI, Request, Form, Depends) 
+from fastapi import (FastAPI, Request, Form, Depends, Body) 
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -45,9 +45,7 @@ def get_db():
     finally:
         db.close()
 
-def validate_request(request):
-    logger.error(request.body)
-    request_body = request.body()
+def validate_request(request, request_body):
     logger.error(request_body)
     timestamp = request.headers['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
@@ -165,13 +163,15 @@ async def upcoming(db: Session = Depends(get_db)):
 @app.post("/api/v1.0/command")
 async def command(
         request: Request, 
-        text: str = Form(...), db: Session = Depends(get_db)):
+        body: str = Body(...),
+        text: str = Form(...), 
+        db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
-    if not validate_request(request):
+    if not validate_request(request, body):
         return
 
     try:
