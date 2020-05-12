@@ -172,7 +172,7 @@ async def command(
     request_body = await request.body()
     text = None
     form = await request.form()
-    logger.error(body)
+    logger.error(request_body)
     logger.error(form)
     logger.error(form["text"])
 
