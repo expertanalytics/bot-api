@@ -45,21 +45,21 @@ def get_db():
     finally:
         db.close()
 
-def validate_request(request_body):
-    logger.error(request_body)
-    timestamp = request.headers['X-Slack-Request-Timestamp']
+def validate_request(request):
+    logger.error(request)
+    timestamp = request["headers"]['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
     #     # The request timestamp is more than five minutes from local time.
     #     # It could be a replay attack, so let's ignore it.
     #     return False
 
-    sig_basestring = f"v0:{timestamp}:{request_body}".encode("utf-8")
+    sig_basestring = f"v0:{timestamp}:{request['body']}".encode("utf-8")
     computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
                             sig_basestring,
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = f"v0={computed_hash}"
 
-    slack_signature = request.headers['X-Slack-Signature']
+    slack_signature = request["headers"]['X-Slack-Signature']
     if hmac.compare_digest(my_signature, slack_signature):
         return True
     else:
@@ -169,8 +169,8 @@ async def command(
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
-    request_body = await request.body()
-    if not validate_request(request_body):
+    request = await request.json()
+    if not validate_request(request):
         return
 
     try:
