@@ -53,14 +53,14 @@ def validate_request(request):
     #     # It could be a replay attack, so let's ignore it.
     #     return False
 
-    sig_basestring = f"v0:{timestamp}:{request_body}"
+    sig_basestring = f"v0:{timestamp}:{request_body}".encode("utf-8")
     computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
                             sig_basestring.encode("utf-8"),
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = f"v0={computed_hash}"
 
     slack_signature = request.headers['X-Slack-Signature']
-    if my_signature == slack_signature:
+    if hmac.compare_digest(my_signature, slack_signature):
         return True
     else:
         logger.error(f"Request failed: {my_signature} != {slack_signature}")
