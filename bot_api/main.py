@@ -45,7 +45,8 @@ def get_db():
     finally:
         db.close()
 
-def validate_request(request, request_body):
+def validate_request(request):
+    request_body = request.body()
     logger.error(request_body)
     timestamp = request.headers['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
@@ -163,15 +164,17 @@ async def upcoming(db: Session = Depends(get_db)):
 @app.post("/api/v1.0/command")
 async def command(
         request: Request, 
+        # text: str = Form(...), 
         db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
-    # if not text:
-    #     return commands.default_responses["INVALID_COMMAND"] 
-    req = await request.json()
+    req = await request.body()
     logger.error(req)
 
-    if not validate_request(request, body):
+    if not text:
+        return commands.default_responses["INVALID_COMMAND"] 
+
+    if not validate_request(req):
         return
 
     try:
