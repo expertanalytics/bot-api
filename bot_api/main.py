@@ -46,7 +46,8 @@ def get_db():
         db.close()
 
 def validate_request(request):
-    request_body = request.get_data()
+    request_body = request.body()
+    logger.error(request_body)
     timestamp = request.headers['X-Slack-Request-Timestamp']
     # if abs(time.time() - timestamp) > 60 * 5:
     #     # The request timestamp is more than five minutes from local time.
