@@ -1,5 +1,7 @@
 import json
 import os
+import time
+import hmac
 import datetime
 from datetime import date
 import logging
@@ -31,6 +33,7 @@ CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
+SLACK_SIGNING_SECRET = os.environ.get("SLACK_USER_TOKEN")
 
 
 # Dependency
@@ -40,6 +43,25 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def validate_request(request):
+    request_body = request.body()
+    timestamp = request.headers['X-Slack-Request-Timestamp']
+    if absolute_value(time.time() - timestamp) > 60 * 5:
+        # The request timestamp is more than five minutes from local time.
+        # It could be a replay attack, so let's ignore it.
+        return False
+
+    sig_basestring = f"v0:{timestamp}:{request_body}"
+    computed_hash = hmac.compute_hash_sha256(
+            SLACK_SIGNING_SECRET, sig_basestring).hexdigest()
+    my_signature = "v0={computed_hash}"
+
+    slack_signature = request.headers['X-Slack-Signature']
+    if hmac.compare(my_signature, slack_signature):
+        return True
+
+    return False
 
         
 # Keep Heroku server alive
@@ -136,14 +158,18 @@ async def upcoming(db: Session = Depends(get_db)):
 
 
 @app.post("/api/v1.0/command")
-async def command(text: str = Form(...), db: Session = Depends(get_db)):
+async def command(
+        request: Request, 
+        text: str = Form(...), db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
+    if not validate_request(request):
+        return
+
     try:
-        logger.info("Request contained: {text}")
         args = commands.get_args_from_request(text)
     except ArgumentError as e:
         return {"text": str(e), "response_type": "ephemeral"}
