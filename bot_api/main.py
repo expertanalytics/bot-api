@@ -54,7 +54,7 @@ def validate_request(request):
         return False
 
     sig_basestring = f"v0:{timestamp}:{request_body}"
-    computed_hash = hmac.new(SLACK_SIGNING_SECRET,
+    computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
                             sig_basestring.encode("utf-8"),
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = "v0={computed_hash}"
