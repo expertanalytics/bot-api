@@ -59,7 +59,7 @@ def validate_request(request_body, timestamp, slack_signature):
     sig_basestring = f"v0:{timestamp}:{body}"
     logger.error(sig_basestring)
     computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
-                            msg=str(sig_basestring),
+                            sig_basestring.encode("utf-8"),
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = f"v0={computed_hash}"
 
