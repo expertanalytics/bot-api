@@ -169,8 +169,8 @@ async def command(
 
     timestamp = request.headers['X-Slack-Request-Timestamp']
     slack_signature = request.headers['X-Slack-Signature']
-    request_body = f"token={token}"
     logger.error(body)
+    request_body = f"token={token}"
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
