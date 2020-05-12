@@ -60,7 +60,7 @@ def validate_request(request):
     my_signature = "v0={computed_hash}"
 
     slack_signature = request.headers['X-Slack-Signature']
-    if hmac.compare(my_signature, slack_signature):
+    if my_signature == slack_signature:
         return True
 
     return False
