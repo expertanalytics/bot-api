@@ -63,7 +63,7 @@ def validate_request(request):
     if my_signature == slack_signature:
         return True
     else:
-        logger.error("Request failed: {my_signature} != {slack_signature}")
+        logger.error(f"Request failed: {my_signature} != {slack_signature}")
         return False
 
         
