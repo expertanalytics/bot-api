@@ -46,20 +46,14 @@ def get_db():
         db.close()
 
 def validate_request(request_body, timestamp, slack_signature):
-    logger.error(request_body)
-    # if abs(time.time() - timestamp) > 60 * 5:
-    #     # The request timestamp is more than five minutes from local time.
-    #     # It could be a replay attack, so let's ignore it.
-    #     return False
+    if abs(time.time() - int(timestamp)) > 60 * 5:
+        # The request timestamp is more than five minutes from local time.
+        # It could be a replay attack, so let's ignore it.
+        return False
 
-    body = request_body.decode()
-    logger.error(request_body)
-    logger.error(body)
-    logger.error(timestamp)
-    sig_basestring = f"v0:{timestamp}:{body}"
-    logger.error(sig_basestring)
+    sig_basestring = f"v0:{timestamp}:{request_body.decode()}".encode("utf-8")
     computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
-                            sig_basestring.encode("utf-8"),
+                            sig_basestring,
                             digestmod=hashlib.sha256).hexdigest()
     my_signature = f"v0={computed_hash}"
 
