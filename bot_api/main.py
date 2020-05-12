@@ -162,13 +162,14 @@ async def upcoming(db: Session = Depends(get_db)):
 async def command(
         request: Request, 
         text: str = Form(...), 
+        token: str = Body(...), 
         db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
     timestamp = request.headers['X-Slack-Request-Timestamp']
     slack_signature = request.headers['X-Slack-Signature']
-    request_body = await request.body()
-    logger.info(request_body, text)
+    request_body = f"token={token}"
+    logger.error(request_body)
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
