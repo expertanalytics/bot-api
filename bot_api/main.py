@@ -161,7 +161,7 @@ async def upcoming(db: Session = Depends(get_db)):
 @app.post("/api/v1.0/command")
 async def command(
         request: Request, 
-        # text: str = Form(...), 
+        text: str = Form(...), 
         db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
