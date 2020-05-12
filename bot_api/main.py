@@ -2,6 +2,7 @@ import json
 import os
 import time
 import hmac
+import hashlib
 import datetime
 from datetime import date
 import logging
@@ -53,8 +54,9 @@ def validate_request(request):
         return False
 
     sig_basestring = f"v0:{timestamp}:{request_body}"
-    computed_hash = hmac.compute_hash_sha256(
-            SLACK_SIGNING_SECRET, sig_basestring).hexdigest()
+    computed_hash = hmac.new(SLACK_SIGNING_SECRET,
+                            sig_basestring.encode("utf-8"),
+                            digestmod=hashlib.sha256).hexdigest()
     my_signature = "v0={computed_hash}"
 
     slack_signature = request.headers['X-Slack-Signature']
