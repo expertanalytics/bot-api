@@ -130,18 +130,20 @@ async def events(request: Request):
 
 @app.post("/api/v1.0/upcoming")
 async def upcoming(db: Session = Depends(get_db)):
+    """Endpoint for the /upcoming command"""
     return {"text": commands.commands["upcoming"]["command"](None, db), 
             "response_type": "ephemeral"}
 
 
 @app.post("/api/v1.0/command")
 async def command(text: str = Form(...), db: Session = Depends(get_db)):
-    """Executes bot command if the command is known."""
+    """Endpoint for general bot commands"""
 
     if not text:
         return commands.default_responses["INVALID_COMMAND"] 
 
     try:
+        logger.info("Request contained: {text}")
         args = commands.get_args_from_request(text)
     except ArgumentError as e:
         return {"text": str(e), "response_type": "ephemeral"}
