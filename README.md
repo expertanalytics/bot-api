@@ -35,7 +35,7 @@ uvicorn bot_api.main:app --reload
 ```
 
 ### Database
-The current edition of the bot-api uses a free-tier PostgreSQL. 
+The current edition of the bot-api uses a free-tier PostgreSQL database from Heroku. 
 Setting up a postgres database is outside the scope of this readme.
 The following therefore relies on a database already being set up,
 and the `DATABASE_URL` environmental variable being set correctly.
@@ -50,18 +50,18 @@ Add additional data using the following command
 python yaml_to_db.py /path/to/schedules.yaml
 ``` 
 It translates a `.yaml` schedule and adds the schedule to the database. 
-See `res/` for an example `.yaml` file  (or just add events using the slack bot after it's set up).
+See `res/` for an example `.yaml` file.
+If you want to start with a blank calendar, just add events using the slack bot after it's set up.
 
 ### Aditional information
-- `Procfile` contains run instructions for a Gunicorn/Uvicorn server 
-(currently hosted on Heroku).
+- `Procfile` contains run instructions for a Gunicorn/Uvicorn server (currently hosted on Heroku).
 - `runtime.txt` specifies the Python version for Heroku.
 
 After the uvicorn server has been started, visit the [automated documentation](http://localhost:8000/docs).
 It also let's you test out the api endpoints.
 
 ## Testing
-From repo root dir
+From the repository's root directory
 ```bash
 pytest
 ```
