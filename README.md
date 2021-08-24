@@ -65,3 +65,7 @@ From the repository's root directory
 ```bash
 pytest
 ```
+
+## Deployment
+The API and the PostgreSQL database are both hosted on Heroku with a free license.
+Details on how to set up deployment may or may not be added at a later time.
