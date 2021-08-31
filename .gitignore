@@ -3,3 +3,4 @@ venv/
 .DS_Store
 .env
 bot_api.egg-info/
+.idea/
