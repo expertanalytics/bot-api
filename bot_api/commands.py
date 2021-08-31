@@ -11,27 +11,19 @@ from .models import Event
 
 event_types = ["fagdag", "formiddag"]
 default_responses = {
-        "NO_EVENTS": "No upcoming events.",
-        "INVALID_DATE_ERROR": "Error: Unable to parse date.",
-        "EXISTING_DATE_ERROR": "Error: Date already in schedule",
-        "PAST_DATE_ERROR": "Error: Date is in the past.",
-        "INVALID_EVENT_ERROR": (
-            f"Error: Invalid event. Try one of {event_types}"),
-        "SCHEDULE_EMPTY_ERROR": (
-            "Error: The upcoming schedule is empty. Please add some dates."),
-        "MISSING_DATE_ERROR": (
-            "Error: The specified date is not in the schedule. "
-            "Use the `add` command if you want to add a new date."),
-        "ALREADY_CANCELLED_ERROR": (
-            "Error: This event has (already) been cancelled."),
-        "ALREADY_CLEARED_ERROR": "Error: This event is already empty.",
-        "ALREADY_SCHEDULED_ERROR": (
-            "Error: A presentation has already been scheduled on this date."),
-        "CALL_TO_ACTION": (
-            "No one is scheduled for the next presentation "
-            "({0}). "
-            "The due date is *{1}* at 23:59."),
-        }
+    "NO_EVENTS": "No upcoming events.",
+    "INVALID_DATE_ERROR": "Error: Unable to parse date.",
+    "EXISTING_DATE_ERROR": "Error: Date already in schedule",
+    "PAST_DATE_ERROR": "Error: Date is in the past.",
+    "INVALID_EVENT_ERROR": f"Error: Invalid event. Try one of {event_types}",
+    "SCHEDULE_EMPTY_ERROR": "Error: The upcoming schedule is empty. Please add some dates.",
+    "MISSING_DATE_ERROR": (
+        "Error: The specified date is not in the schedule. Use the `add` command if you want to add a new date."),
+    "ALREADY_CANCELLED_ERROR": "Error: This event has (already) been cancelled.",
+    "ALREADY_CLEARED_ERROR": "Error: This event is already empty.",
+    "ALREADY_SCHEDULED_ERROR": "Error: A presentation has already been scheduled on this date.",
+    "CALL_TO_ACTION": "No one is scheduled for the next presentation ({0}). The due date is *{1}* at 23:59.",
+}
 
 
 class ArgumentParser(ArgumentParser):
@@ -50,12 +42,9 @@ def get_formatted_event(event: Event):
     if not event.what:
         response = f"*{prettify_date(event.when)}*: No presentation scheduled."
     elif not event.who:
-        return (f"*{prettify_date(event.when)}*: "
-                f"Event is cancelled due to {event.what}!")
+        return f"*{prettify_date(event.when)}*: Event is cancelled due to {event.what}!"
     else:
-        response = (
-                f"*{prettify_date(event.when)}*: "
-                f"Presentation *{event.what}* by *{event.who}*.")
+        response = f"*{prettify_date(event.when)}*: Presentation *{event.what}* by *{event.who}*."
 
     fagdag_tag = f" :busts_in_silhouette: Fagdag" if is_fagdag else ""
     return f"{response}{fagdag_tag}"
@@ -182,20 +171,16 @@ def add_new_date(args, db: Session = None):
     if db_event:
         raise ExistingDateError
 
-    crud.create_event(
-            db=db, event_type=args.event, when=when)
+    crud.create_event(db=db, event_type=args.event, when=when)
 
-    return (f"{prettify_date(when)}"
-            f" successfully added to the schedule.")
+    return f"{prettify_date(when)} successfully added to the schedule."
 
 
 def remove_existing_future_date(args, db: Session = None):
     if not args.when:
         raise UsageError
 
-    when = dateparser.parse(
-            args.when, 
-            settings={'STRICT_PARSING': True})
+    when = dateparser.parse(args.when, settings={'STRICT_PARSING': True})
 
     if not when:
         raise InvalidDateError
@@ -211,8 +196,7 @@ def remove_existing_future_date(args, db: Session = None):
     crud.remove_event(
             db=db, when=when)
 
-    return (f"{prettify_date(when)} "
-            f"successfully removed from the schedule.")
+    return f"{prettify_date(when)} successfully removed from the schedule."
 
 
 def list_next_event(args, db: Session = None):
@@ -228,8 +212,7 @@ def list_upcoming_events(args, db: Session = None):
     if db_events is None:
         return default_responses["NO_EVENTS"]
 
-    return "\n".join(
-            [f">{get_formatted_event(event)}" for event in db_events])
+    return "\n".join([f">{get_formatted_event(event)}" for event in db_events])
 
 
 def list_shorthands(args, db: Session = None):
@@ -237,15 +220,11 @@ def list_shorthands(args, db: Session = None):
 
 
 def list_help(args, db: Session = None):
-    return "\n".join(
-            [f"{y['usage']}\n>{y['help_text']}\n" for x,y in commands.items()])
+    return "\n".join([f"{y['usage']}\n>{y['help_text']}\n" for x,y in commands.items()])
 
 
-def get_unique_shorthand(i, key, short_keys, long_keys):
-    """
-    Gets the shortest sub-string of 'key' that is not in either 'long_keys'
-    or 'short_keys'. 
-    """
+def get_unique_shorthand(i: int, key: str, short_keys: str, long_keys: str):
+    """Gets the shortest sub-string of 'key' that is not in either 'long_keys' or 'short_keys'."""
 
     if i >= len(key):
         return key
@@ -279,8 +258,7 @@ commands = {
                 "The date you pick has to exist and be vacant. "
                 "To add a new date, see the `add` command. "
                 "In order to cancel an event, see the `cancel` command. "
-                "(Protip: you don't have to specify an exact date – "
-                "`in two weeks` and `13 nov` works just as well!)"
+                "(Protip: you don't have to specify an exact date – `in two weeks` and `13 nov` works just as well!)"
                 ),
             "usage": "`/c schedule --who <who> --what <what> --when <when>`",
             },
@@ -330,5 +308,4 @@ for key in commands:
     shorthand = get_unique_shorthand(1, key, shorthands, commands)
     shorthands[shorthand] = key
 
-default_responses["INVALID_COMMAND"] = (
-        f"Sorry. Try one of these: *{[*commands]}*.")
+default_responses["INVALID_COMMAND"] = f"Sorry. Try one of these: *{[*commands]}*."
