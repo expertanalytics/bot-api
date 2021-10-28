@@ -29,9 +29,8 @@ if __name__ == "__main__":
     for x in session.query(Event).all():
         print(x.when, x.event_type, x.what, x.who)
 
-    values = [
-        Event(event_type=vals["event"], when=date, what=vals["what"], who=vals["who"]) 
-            for date, vals in schedule_dict.items()]
+    values = [Event(event_type=vals["event"], when=date, what=vals["what"], who=vals["who"]) for 
+              date, vals in schedule_dict.items()]
 
     session.add_all(values)
     session.commit()
