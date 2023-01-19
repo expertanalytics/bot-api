@@ -8,7 +8,7 @@ from datetime import date
 import logging
 
 import requests
-from fastapi import (FastAPI, Request, Form, Depends, Body) 
+from fastapi import (FastAPI, Request, Form, Depends, Body)
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -33,7 +33,6 @@ CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
 
 PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
-SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
 SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
 
 
@@ -66,7 +65,7 @@ def validate_request(request_body, timestamp, slack_signature):
         logger.error(f"Request failed: {my_signature} != {slack_signature}")
         return False
 
-        
+
 # Keep Heroku server alive
 def ping_server():
     req = requests.get(PING_ENDPOINT_URL)
@@ -106,7 +105,7 @@ def post_msg_if_no_presenter():
                 commands.prettify_date(db_event.when), "in one week")
 
         return requests.post(POST_MESSAGE_URL, data=message)
-        
+
     message["text"] = commands.default_responses["CALL_TO_ACTION"].format(
             commands.prettify_date(db_event.when), "tonight")
 
@@ -156,7 +155,7 @@ async def events(request: Request):
 @app.post("/api/v1.0/upcoming")
 async def upcoming(db: Session = Depends(get_db)):
     """Endpoint for the /upcoming command"""
-    return {"text": commands.commands["upcoming"]["command"](None, db), 
+    return {"text": commands.commands["upcoming"]["command"](None, db),
             "response_type": "ephemeral"}
 
 
@@ -172,7 +171,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
     text = form.get("text")
 
     if not text:
-        return commands.default_responses["INVALID_COMMAND"] 
+        return commands.default_responses["INVALID_COMMAND"]
 
     if not validate_request(request_body, timestamp, slack_signature):
         return {"text": "Invalid request."}
@@ -181,7 +180,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
         args = commands.get_args_from_request(text)
     except ArgumentError as e:
         return {"text": str(e), "response_type": "ephemeral"}
-    
+
     # Switch a potential shorthand with the corresponding command
     cmd = commands.shorthands.get(args.command, args.command)
 
@@ -190,7 +189,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
         response = commands.commands[cmd]["command"](args, db)
         was_raised = False
     except KeyError as e:
-        response = commands.default_responses["INVALID_COMMAND"] 
+        response = commands.default_responses["INVALID_COMMAND"]
     except UsageError:
         response = f"Usage error: {commands.commands[cmd]['usage']}"
     except InvalidDateError:
