@@ -4,3 +4,4 @@ venv/
 .env
 bot_api.egg-info/
 .idea/
+.vscode/
