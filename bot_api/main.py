@@ -31,7 +31,7 @@ FAGDAG_CHANNEL_ID = "C0YMPPHT6"
 TEST_CHANNEL_ID = "CP3SWEVHT"
 CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
 
-PING_ENDPOINT_URL = "http://slackbot-api.herokuapp.com/api/v1.0/ping"
+PING_ENDPOINT_URL = "http://cbot.xal.no/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
 
