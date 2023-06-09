@@ -47,12 +47,17 @@ def get_event_by_date(db: Session, when: str):
 def get_closest_event(db: Session, when: str):
     now = datetime.datetime.now().date()
 
-    greater = db.query(models.Event).filter(
-            models.Event.when >= when).order_by(
-                    models.Event.when.asc()).limit(1).first()
+    greater = (
+        db.query(models.Event).filter(models.Event.when >= when).order_by(models.Event.when.asc()).limit(1).first()
+    )
 
-    lesser = db.query(models.Event).filter(
-        and_(models.Event.when <= when, models.Event.when >= now)).order_by(models.Event.when.desc()).limit(1).first()
+    lesser = (
+        db.query(models.Event)
+        .filter(and_(models.Event.when <= when, models.Event.when >= now))
+        .order_by(models.Event.when.desc())
+        .limit(1)
+        .first()
+    )
 
     items = [x for x in (lesser, greater) if x]
     db_event = _nearest(items, when)

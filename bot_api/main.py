@@ -8,7 +8,7 @@ from datetime import date
 import logging
 
 import requests
-from fastapi import (FastAPI, Request, Form, Depends, Body)
+from fastapi import FastAPI, Request, Form, Depends, Body
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -44,6 +44,7 @@ def get_db():
     finally:
         db.close()
 
+
 def validate_request(request_body, timestamp, slack_signature):
     if not timestamp or not slack_signature:
         return False
@@ -54,9 +55,9 @@ def validate_request(request_body, timestamp, slack_signature):
         return False
 
     sig_basestring = f"v0:{timestamp}:{request_body.decode()}".encode("utf-8")
-    computed_hash = hmac.new(bytes(SLACK_SIGNING_SECRET, encoding="utf-8"),
-                             sig_basestring,
-                             digestmod=hashlib.sha256).hexdigest()
+    computed_hash = hmac.new(
+        bytes(SLACK_SIGNING_SECRET, encoding="utf-8"), sig_basestring, digestmod=hashlib.sha256
+    ).hexdigest()
     my_signature = f"v0={computed_hash}"
 
     if hmac.compare_digest(my_signature, slack_signature):
@@ -78,10 +79,10 @@ def post_msg_if_no_presenter():
 
     channel = CURRENT_CHANNEL
     message = {
-            "channel": channel,
-            "text": "",
-            "token": SLACK_BOT_TOKEN,
-            }
+        "channel": channel,
+        "text": "",
+        "token": SLACK_BOT_TOKEN,
+    }
 
     now = datetime.datetime.now().date()
     if not db_event.when:
@@ -102,12 +103,14 @@ def post_msg_if_no_presenter():
         return
     elif td > datetime.timedelta(days=7):
         message["text"] = commands.default_responses["CALL_TO_ACTION"].format(
-                commands.prettify_date(db_event.when), "in one week")
+            commands.prettify_date(db_event.when), "in one week"
+        )
 
         return requests.post(POST_MESSAGE_URL, data=message)
 
     message["text"] = commands.default_responses["CALL_TO_ACTION"].format(
-            commands.prettify_date(db_event.when), "tonight")
+        commands.prettify_date(db_event.when), "tonight"
+    )
 
     db.close()
     return requests.post(POST_MESSAGE_URL, data=message)
@@ -129,9 +132,9 @@ def set_new_topic_if_not_set():
         return
 
     message = {
-            "token": SLACK_BOT_TOKEN,
-            "topic": new_channel_topic,
-            "channel": channel,
+        "token": SLACK_BOT_TOKEN,
+        "topic": new_channel_topic,
+        "channel": channel,
     }
 
     channel_info = requests.post(CHANNEL_INFO_URL, data=message).json()
@@ -155,16 +158,15 @@ async def events(request: Request):
 @app.post("/api/v1.0/upcoming")
 async def upcoming(db: Session = Depends(get_db)):
     """Endpoint for the /upcoming command"""
-    return {"text": commands.commands["upcoming"]["command"](None, db),
-            "response_type": "ephemeral"}
+    return {"text": commands.commands["upcoming"]["command"](None, db), "response_type": "ephemeral"}
 
 
 @app.post("/api/v1.0/command")
 async def command(request: Request, db: Session = Depends(get_db)):
     """Endpoint for general bot commands"""
 
-    timestamp = request.headers.get('X-Slack-Request-Timestamp')
-    slack_signature = request.headers.get('X-Slack-Signature')
+    timestamp = request.headers.get("X-Slack-Request-Timestamp")
+    slack_signature = request.headers.get("X-Slack-Signature")
 
     request_body = await request.body()
     form = await request.form()
@@ -208,7 +210,6 @@ async def command(request: Request, db: Session = Depends(get_db)):
         response = commands.default_responses["ALREADY_CLEARED_ERROR"]
     except AlreadyCancelledError:
         response = commands.default_responses["ALREADY_CANCELLED_ERROR"]
-
 
     response_type = "ephemeral" if args.silent or was_raised else "in_channel"
     return {"text": response, "response_type": response_type}

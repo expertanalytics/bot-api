@@ -2,8 +2,7 @@ import os
 import sys
 
 import sqlalchemy
-from sqlalchemy import (create_engine, Table, Column, Integer, 
-        String, Date)
+from sqlalchemy import create_engine, Table, Column, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 
 from bot_api.models import Event
