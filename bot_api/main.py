@@ -141,13 +141,10 @@ def set_new_topic_if_not_set():
 
     channel = CURRENT_CHANNEL
 
-    if not db_event.when:
-        return
-
-    if db_event.who:
-        new_channel_topic = commands.get_formatted_event(db_event)
+    if db_event is None or not bool(db_event.who) or not bool(db_event.when):
+        new_channel_topic = "No formiddag events scheduled :("
     else:
-        return
+        new_channel_topic = commands.get_formatted_event(db_event)
 
     message = {
         "token": SLACK_BOT_OAUTH_TOKEN,
