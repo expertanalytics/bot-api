@@ -1,5 +1,6 @@
 import datetime
 from datetime import date
+from typing import Optional
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -32,7 +33,7 @@ def remove_event(db: Session, when: date):
     return db_event
 
 
-def update_event(db: Session, db_event: models.Event, who: str | None, what: str | None):
+def update_event(db: Session, db_event: models.Event, who: Optional[str], what: Optional[str]):
     db_event.who = who
     db_event.what = what
     db.commit()

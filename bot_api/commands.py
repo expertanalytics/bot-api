@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import datetime
+from typing import Optional
 
 from sqlalchemy.orm import Session
 import dateparser
@@ -84,7 +85,7 @@ def get_args_from_request(request):
     return args
 
 
-def schedule_new_event(args, db: Session | None = None):
+def schedule_new_event(args, db: Optional[Session] = None):
     if not args.who or not args.when or not args.what:
         raise UsageError
 
@@ -112,7 +113,7 @@ def schedule_new_event(args, db: Session | None = None):
     return f"Successfully scheduled {get_formatted_event(db_event)}"
 
 
-def clear_event(args, db: Session | None = None):
+def clear_event(args, db: Optional[Session] = None):
     if not args.when:
         raise UsageError
 
@@ -136,7 +137,7 @@ def clear_event(args, db: Session | None = None):
     return f"Successfully cleared {prettify_date(when)}"
 
 
-def cancel_event(args, db: Session | None = None):
+def cancel_event(args, db: Optional[Session] = None):
     if not args.when or not args.what:
         raise UsageError
 
@@ -185,7 +186,7 @@ def add_new_date(args, db: Session = None):
     return f"{prettify_date(when)} successfully added to the schedule."
 
 
-def remove_existing_future_date(args, db: Session | None = None):
+def remove_existing_future_date(args, db: Optional[Session] = None):
     if not args.when:
         raise UsageError
 
@@ -207,7 +208,7 @@ def remove_existing_future_date(args, db: Session | None = None):
     return f"{prettify_date(when)} successfully removed from the schedule."
 
 
-def list_next_event(args, db: Session | None = None):
+def list_next_event(args, db: Optional[Session] = None):
     db_event = crud.get_closest_event(db, when=datetime.date.today())
     if db_event is None or not db_event.who:
         return default_responses["NO_EVENTS"]
@@ -215,7 +216,7 @@ def list_next_event(args, db: Session | None = None):
     return get_formatted_event(db_event)
 
 
-def list_upcoming_events(args, db: Session | None = None):
+def list_upcoming_events(args, db: Optional[Session] = None):
     db_events = crud.get_upcoming_events(db, when=datetime.date.today())
     if db_events is None:
         return default_responses["NO_EVENTS"]
@@ -223,11 +224,11 @@ def list_upcoming_events(args, db: Session | None = None):
     return "\n".join([f">{get_formatted_event(event)}" for event in db_events])
 
 
-def list_shorthands(args, db: Session | None = None):
+def list_shorthands(args, db: Optional[Session] = None):
     return "\n".join([f">{c}: `{s}`" for s, c in shorthands.items()])
 
 
-def list_help(args, db: Session | None = None):
+def list_help(args, db: Optional[Session] = None):
     return "\n".join([f"{y['usage']}\n>{y['help_text']}\n" for _, y in commands.items()])
 
 
