@@ -1,10 +1,10 @@
 import datetime
-from datetime import date, timedelta
+from datetime import date
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from bot_api import models
 
 
 def _nearest(items, pivot):
@@ -32,7 +32,7 @@ def remove_event(db: Session, when: date):
     return db_event
 
 
-def update_event(db: Session, db_event: models.Event, who: str, what: str):
+def update_event(db: Session, db_event: models.Event, who: str | None, what: str | None):
     db_event.who = who
     db_event.what = what
     db.commit()
@@ -40,11 +40,11 @@ def update_event(db: Session, db_event: models.Event, who: str, what: str):
     return db_event
 
 
-def get_event_by_date(db: Session, when: str):
+def get_event_by_date(db: Session, when: date):
     return db.query(models.Event).filter(models.Event.when == when).first()
 
 
-def get_closest_event(db: Session, when: str):
+def get_closest_event(db: Session, when: date):
     now = datetime.datetime.now().date()
 
     greater = (
@@ -65,5 +65,5 @@ def get_closest_event(db: Session, when: str):
     return db_event
 
 
-def get_upcoming_events(db: Session, when: str):
+def get_upcoming_events(db: Session, when: date):
     return db.query(models.Event).filter(models.Event.when >= when).order_by(models.Event.when).all()

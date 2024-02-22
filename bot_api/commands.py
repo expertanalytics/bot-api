@@ -4,9 +4,20 @@ import datetime
 from sqlalchemy.orm import Session
 import dateparser
 
-from . import crud
-from .errors import *
-from .models import Event
+from bot_api import crud
+from bot_api.errors import (
+    AlreadyCancelledError,
+    AlreadyClearedError,
+    AlreadyScheduledError,
+    ArgumentError,
+    ExistingDateError,
+    InvalidDateError,
+    InvalidEventError,
+    MissingDateError,
+    PastDateError,
+    UsageError,
+)
+from bot_api.models import Event
 
 
 event_types = ["fagdag", "formiddag"]
@@ -27,7 +38,7 @@ default_responses = {
 }
 
 
-class ArgumentParser(ArgumentParser):
+class CustomArgumentParser(ArgumentParser):
     def error(self, message):
         raise ArgumentError(message)
         # self.exit(2, '%s: error: %s\n' % (self.prog, message))
@@ -38,22 +49,22 @@ def prettify_date(date):
 
 
 def get_formatted_event(event: Event):
-    is_fagdag = event.event_type == "fagdag"
+    is_fagdag = str(event.event_type) == "fagdag"
 
-    if not event.what:
+    if event.what is None:
         response = f"*{prettify_date(event.when)}*: No presentation scheduled."
-    elif not event.who:
+    elif event.who is None:
         return f"*{prettify_date(event.when)}*: Event is cancelled due to {event.what}!"
     else:
         response = f"*{prettify_date(event.when)}*: Presentation *{event.what}* by *{event.who}*."
 
-    fagdag_tag = f" :busts_in_silhouette: Fagdag" if is_fagdag else ""
+    fagdag_tag = " :busts_in_silhouette: Fagdag" if is_fagdag else ""
     return f"{response}{fagdag_tag}"
 
 
 def get_args_from_request(request):
     """Creates an ArgumentParser and parses input arguments"""
-    cmd_parser = ArgumentParser()
+    cmd_parser = CustomArgumentParser()
 
     cmd_parser.add_argument("command", type=str)
 
@@ -73,7 +84,7 @@ def get_args_from_request(request):
     return args
 
 
-def schedule_new_event(args, db: Session = None):
+def schedule_new_event(args, db: Session | None = None):
     if not args.who or not args.when or not args.what:
         raise UsageError
 
@@ -101,7 +112,7 @@ def schedule_new_event(args, db: Session = None):
     return f"Successfully scheduled {get_formatted_event(db_event)}"
 
 
-def clear_event(args, db: Session = None):
+def clear_event(args, db: Session | None = None):
     if not args.when:
         raise UsageError
 
@@ -117,7 +128,7 @@ def clear_event(args, db: Session = None):
     if datetime.datetime.now().date() > when:
         raise PastDateError
 
-    if not db_event.what and not db_event.who:
+    if not bool(db_event.what) and not bool(db_event.who):
         raise AlreadyClearedError
 
     crud.update_event(db=db, db_event=db_event, what=None, who=None)
@@ -125,7 +136,7 @@ def clear_event(args, db: Session = None):
     return f"Successfully cleared {prettify_date(when)}"
 
 
-def cancel_event(args, db: Session = None):
+def cancel_event(args, db: Session | None = None):
     if not args.when or not args.what:
         raise UsageError
 
@@ -141,7 +152,7 @@ def cancel_event(args, db: Session = None):
     if datetime.datetime.now().date() > when:
         raise PastDateError
 
-    if db_event.what and not db_event.who:
+    if bool(db_event.what) and not bool(db_event.who):
         raise AlreadyCancelledError
 
     crud.update_event(db=db, db_event=db_event, what=args.what, who=None)
@@ -174,7 +185,7 @@ def add_new_date(args, db: Session = None):
     return f"{prettify_date(when)} successfully added to the schedule."
 
 
-def remove_existing_future_date(args, db: Session = None):
+def remove_existing_future_date(args, db: Session | None = None):
     if not args.when:
         raise UsageError
 
@@ -196,7 +207,7 @@ def remove_existing_future_date(args, db: Session = None):
     return f"{prettify_date(when)} successfully removed from the schedule."
 
 
-def list_next_event(args, db: Session = None):
+def list_next_event(args, db: Session | None = None):
     db_event = crud.get_closest_event(db, when=datetime.date.today())
     if db_event is None or not db_event.who:
         return default_responses["NO_EVENTS"]
@@ -204,7 +215,7 @@ def list_next_event(args, db: Session = None):
     return get_formatted_event(db_event)
 
 
-def list_upcoming_events(args, db: Session = None):
+def list_upcoming_events(args, db: Session | None = None):
     db_events = crud.get_upcoming_events(db, when=datetime.date.today())
     if db_events is None:
         return default_responses["NO_EVENTS"]
@@ -212,12 +223,12 @@ def list_upcoming_events(args, db: Session = None):
     return "\n".join([f">{get_formatted_event(event)}" for event in db_events])
 
 
-def list_shorthands(args, db: Session = None):
+def list_shorthands(args, db: Session | None = None):
     return "\n".join([f">{c}: `{s}`" for s, c in shorthands.items()])
 
 
-def list_help(args, db: Session = None):
-    return "\n".join([f"{y['usage']}\n>{y['help_text']}\n" for x, y in commands.items()])
+def list_help(args, db: Session | None = None):
+    return "\n".join([f"{y['usage']}\n>{y['help_text']}\n" for _, y in commands.items()])
 
 
 def get_unique_shorthand(i: int, key: str, short_keys: str, long_keys: str):
@@ -255,7 +266,7 @@ commands = {
             "The date you pick has to exist and be vacant. "
             "To add a new date, see the `add` command. "
             "In order to cancel an event, see the `cancel` command. "
-            "(Protip: you don't have to specify an exact date – `in two weeks` and `13 nov` works just as well!)"
+            "(Pro-tip: you don't have to specify an exact date – `in two weeks` and `13 nov` works just as well!)"
         ),
         "usage": "`/c schedule --who <who> --what <what> --when <when>`",
     },
@@ -276,12 +287,12 @@ commands = {
     "help": {"command": list_help, "help_text": "Displays this help text.", "usage": "`/c help`"},
     "clear": {
         "command": clear_event,
-        "help_text": ("Clears both the current presenter and the topic " "(`who` and `what`) on the selected date."),
+        "help_text": "Clears both the current presenter and the topic (`who` and `what`) on the selected date.",
         "usage": "`/c clear --when yyyy-mm-dd`",
     },
     "cancel": {
         "command": cancel_event,
-        "help_text": ("Cancels the event on the specified date."),
+        "help_text": "Cancels the event on the specified date.",
         "usage": "`/c cancel --when yyyy-mm-dd --what <reason>`",
     },
     "shorthands": {
@@ -296,4 +307,4 @@ for key in commands:
     shorthand = get_unique_shorthand(1, key, shorthands, commands)
     shorthands[shorthand] = key
 
-default_responses["INVALID_COMMAND"] = f"Sorry. Try one of these: *{[*commands]}*."
+default_responses["INVALID_COMMAND"] = f"Sorry. Try one of these: *{commands}*."

@@ -4,24 +4,34 @@ import time
 import hmac
 import hashlib
 import datetime
-from datetime import date
 import logging
 
 import requests
-from fastapi import FastAPI, Request, Form, Depends, Body
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, Depends
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from . import crud, commands, models, schemas
-from .database import engine, SessionLocal
-from .errors import *
+from bot_api import crud, commands, models
+from bot_api.database import engine, SessionLocal
+from bot_api.errors import (
+    AlreadyCancelledError,
+    AlreadyClearedError,
+    AlreadyScheduledError,
+    ArgumentError,
+    ExistingDateError,
+    InvalidDateError,
+    InvalidEventError,
+    MissingDateError,
+    PastDateError,
+    UsageError,
+)
 
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(use_reloader=False)
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, filename="/home/c-bot/bot_log.log", filemode="w")
 
 POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 SET_TOPIC_URL = "https://slack.com/api/conversations.setTopic"
@@ -33,6 +43,8 @@ CURRENT_CHANNEL = FAGDAG_CHANNEL_ID
 
 PING_ENDPOINT_URL = "http://cbot.xal.no/api/v1.0/ping"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
+SLACK_BOT_OAUTH_TOKEN = os.environ.get("SLACK_BOT_OAUTH_TOKEN")
+SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN")
 SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
 
 
@@ -53,6 +65,9 @@ def validate_request(request_body, timestamp, slack_signature):
         # The request timestamp is more than five minutes from local time.
         # It could be a replay attack, so let's ignore it.
         return False
+
+    if SLACK_SIGNING_SECRET is None:
+        raise ValueError("SLACK_SIGNING_SECRET must be set")
 
     sig_basestring = f"v0:{timestamp}:{request_body.decode()}".encode("utf-8")
     computed_hash = hmac.new(
@@ -76,12 +91,14 @@ def ping_server():
 def post_msg_if_no_presenter():
     db = SessionLocal()
     db_event = crud.get_closest_event(db, when=datetime.date.today())
+    if db_event is None:
+        return
 
     channel = CURRENT_CHANNEL
     message = {
         "channel": channel,
         "text": "",
-        "token": SLACK_BOT_TOKEN,
+        "token": SLACK_BOT_OAUTH_TOKEN,
     }
 
     now = datetime.datetime.now().date()
@@ -119,9 +136,10 @@ def post_msg_if_no_presenter():
 def set_new_topic_if_not_set():
     db = SessionLocal()
     db_event = crud.get_closest_event(db, when=datetime.date.today())
-    channel = CURRENT_CHANNEL
+    if db_event is None:
+        return
 
-    now = datetime.datetime.now().date()
+    channel = CURRENT_CHANNEL
 
     if not db_event.when:
         return
@@ -132,7 +150,7 @@ def set_new_topic_if_not_set():
         return
 
     message = {
-        "token": SLACK_BOT_TOKEN,
+        "token": SLACK_BOT_OAUTH_TOKEN,
         "topic": new_channel_topic,
         "channel": channel,
     }
@@ -190,7 +208,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
     try:
         response = commands.commands[cmd]["command"](args, db)
         was_raised = False
-    except KeyError as e:
+    except KeyError:
         response = commands.default_responses["INVALID_COMMAND"]
     except UsageError:
         response = f"Usage error: {commands.commands[cmd]['usage']}"
@@ -216,7 +234,7 @@ async def command(request: Request, db: Session = Depends(get_db)):
 
 
 sched = BackgroundScheduler(timezone="Europe/Oslo")
-sched.add_job(ping_server, trigger="cron", minute="*/5")
+# sched.add_job(ping_server, trigger="cron", minute="*/5")
 sched.add_job(post_msg_if_no_presenter, trigger="cron", day_of_week=3, hour=12)
 sched.add_job(set_new_topic_if_not_set, trigger="cron", day="*", hour=0, minute=0)
 sched.start()
